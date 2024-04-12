@@ -23,12 +23,13 @@ pip install holidays==0.10.3
 
 
 
-
-
++  fig1 = model.plot(forecast)  최근 200시간 동안 데이터를 통계로 24시간뒤를 예측
 ![output](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/489e968b-02cf-45d4-abba-2694c398d13f)
 
-+  fig1 = model.plot(forecast)  최근 200시간 동안 데이터를 통계로 24시간뒤를 예측
 
-![output2](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/aa48cb14-48ba-44af-a193-e44dbdca8fcd)
+
 
 + fig2 = model.plot_components(forecast) 위 그래프는 전체 trend 와  시간별 추세를 알 수있다.
+![output2](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/aa48cb14-48ba-44af-a193-e44dbdca8fcd)
+
+
