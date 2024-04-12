@@ -49,7 +49,6 @@ def predict_price(ticker):
     future = model.make_future_dataframe(periods=24, freq='H')
     forecast = model.predict(future)
     fig1 = model.plot(forecast)
-    # fig1.show()
     closeDf = forecast[forecast['ds'] == forecast.iloc[-1]['ds'].replace(hour=9)]
     if len(closeDf) == 0:
         closeDf = forecast[forecast['ds'] == data.iloc[-1]['ds'].replace(hour=9)]
