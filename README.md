@@ -2,6 +2,8 @@ Windows 인공지능 (Prophet) 자동매매 환경 설치 방법
 
 아나콘다(https://www.anaconda.com/) 설치
 
+Prophet이 3.9 부터 미지원으로 아나콘다 3.8 버전으로 설치
+
 pip install pyupbit
 
 pip install schedule
