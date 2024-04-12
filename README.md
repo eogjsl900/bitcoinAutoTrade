@@ -34,5 +34,5 @@ pip install holidays==0.10.3
 
 
 
-+ 위 그래프는 vscode에서 보는 방법은
-jupyter 확장설치 후 ctrl + shift +p  창에서 jupyter 대화형 창 만들기 창을 열어 코드를 실행해주면 된다.
++ 위 그래프는 vscode에서 보는 방법은 
++ jupyter 확장설치 후 ctrl + shift +p  창에서 jupyter 대화형 창 만들기 창을 열어 pricePredict.py 코드를 실행해주면 된다.
