@@ -12,5 +12,13 @@ conda install -c conda-forge fbprophet
 
 pip install pystan --upgrade
 
+
+prophet라이브러리와 holidaysPython 라이브러리 간의 호환성 문제로 인해 오류가 발생할수 있음.
+
+호환되는 버전 설치
+pip install holidays==0.10.3
+
+
+
 ![output](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/489e968b-02cf-45d4-abba-2694c398d13f)
 ![output2](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/aa48cb14-48ba-44af-a193-e44dbdca8fcd)
