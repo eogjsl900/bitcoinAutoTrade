@@ -29,7 +29,7 @@ pip install holidays==0.10.3
 
 
 
-+ fig2 = model.plot_components(forecast) 위 그래프는 전체 trend 와  시간별 추세를 알 수있다.
++ fig2 = model.plot_components(forecast) 전체 trend 와  시간별 추세를 알 수있다.
 ![output2](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/aa48cb14-48ba-44af-a193-e44dbdca8fcd)
 
 
