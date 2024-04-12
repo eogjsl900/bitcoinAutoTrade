@@ -8,7 +8,7 @@
 
 ● pip install schedule
 
-● conda install -c conda-forge fbprophet
+● conda install -c conda-forge prophet
 
 ● pip install pystan --upgrade
 
