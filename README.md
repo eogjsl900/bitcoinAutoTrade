@@ -1,22 +1,22 @@
 Windows 인공지능 (Prophet) 자동매매 환경 설치 방법
 
-아나콘다(https://www.anaconda.com/) 설치
+● 아나콘다(https://www.anaconda.com/) 설치
 
-Prophet이 3.9 부터 미지원으로 아나콘다 3.8 버전으로 설치
+● Prophet이 3.9 부터 미지원으로 아나콘다 3.8 버전으로 설치
 
-pip install pyupbit
+● pip install pyupbit
 
-pip install schedule
+● pip install schedule
 
-conda install -c conda-forge fbprophet
+● conda install -c conda-forge fbprophet
 
-pip install pystan --upgrade
+● pip install pystan --upgrade
 
 
-prophet라이브러리와 holidaysPython 라이브러리 간의 호환성 문제로 인해 오류가 발생할수 있음.
+● prophet라이브러리와 holidaysPython 라이브러리 간의 호환성 문제로 인해 오류가 발생할수 있음.
 
-호환되는 버전 설치
-pip install holidays==0.10.3
+● 호환되는 버전 설치 ->
+● pip install holidays==0.10.3
 
 
 
