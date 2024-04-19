@@ -36,3 +36,38 @@ pip install holidays==0.10.3
 
 + 위 그래프는 vscode에서 보는 방법은 
 + jupyter 확장설치 후 ctrl + shift +p  창에서 jupyter 대화형 창 만들기 창을 열어 pricePredict.py 코드를 실행해주면 된다.
+
+
+
+
+
+
+# ** chatGPT openaiAPI를 활용하여 시장동향 파악하기**
++ openaiAPI.py 코드
++ RSS 피드를 이용하여 뉴스기사를 추출하고 openaiAPI에 추출한 내용을 넣어 JSON 형식으로 받아온다
++ ChatGPT 모델을 사용하여 시장 상황 분석
+
+
+           def analyze_market_sentiment(text):
+        
+            response = openai.ChatCompletion.create(
+            
+                model="gpt-3.5-turbo",
+                
+                messages=[
+                
+                    {"role": "system", "content": "Analyze the sentiment and implications of this Bitcoin news article, and the result is returned in the form of 'state' and 'score' JSON"},
+                    
+                    {"role": "user", "content": text}
+                    
+                ]
+                
+            )
+            
+            return response['choices'][0]['message']['content'].strip()
+    
+
++ JSON값은 "status" , "score"
++ status는 긍정 = "positive" , 부정 = "nagetive" , 중립 = "neutral"
++ score는 긍정일때 양수 부정일때 음수값이 들어가며 전체 점수의 합을 totalScore에 기록한다.
+
