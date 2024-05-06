@@ -1,6 +1,7 @@
 import feedparser
-import openai
 import json
+from openai import OpenAI
+
 
 # RSS 피드에서 뉴스 기사 추출
 def fetch_news_from_rss(rss_url):
@@ -15,44 +16,51 @@ def fetch_news_from_rss(rss_url):
     return articles
 
 # ChatGPT 모델을 사용하여 시장 상황 분석
+# gpt-3.5-turbo , gpt-4-turbo-preview 
+
 def analyze_market_sentiment(text):
-    response = openai.ChatCompletion.create(
+
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "Analyze the sentiment and implications of this Bitcoin news article, and the result is returned in the form of 'state' and 'score' JSON"},
+            {"role": "system", "content": "By analyzing news articles, predict future prospects of Bitcoin and enter one json value in summary and state format as the result. Write down the overall analysis in the summary and enter sell, buy, hold in state"},
             {"role": "user", "content": text}
-        ]
+        ],
+        response_format={"type":"json_object"}
     )
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content
 
 
 
 
 # OpenAI API 키 설정
-openai.api_key = 'your-api_key'
+client = OpenAI(api_key = 'your-api_key')
 
 
 # RSS 피드 URL 설정 (예제 URL입니다, 실제 사용가능한 URL로 교체 필요)
-rss_url = 'https://cryptoslate.com/feed/'
+rss_url = 'https://www.coinreaders.com/rss/rss_news.php'
 
 # 뉴스 기사 가져오기
 articles = fetch_news_from_rss(rss_url)
-totalScore=0
+
+news=''
 
 
-# # 분석 결과 출력
-for article in articles:
-    print("Article Title:", article['title'])
-    print("Link:", article['link'])
-    market_analysis = analyze_market_sentiment(article['summary'])
-    print("Market Sentiment Analysis:", market_analysis)
-
-    #가중치 계산
-    market_analysis = json.loads(market_analysis)
-    totalScore = totalScore + market_analysis['score']
+for index, article in enumerate(articles):
+    if index < 10:  # 인덱스가 10 미만인 경우에만 실행
+        news += '제목:' + article['title'] + '\n'
+        news += '내용:' + article['summary'] + '\n\n'
+    else:
+        break  # 인덱스가 10에 도달하면 루프 중단
 
 
 
-    print("---------------------------------------------------")
+market_analysis = analyze_market_sentiment(news)
+market_analysis = json.loads(market_analysis)
 
-print("totalScore:",totalScore)
+
+summary = market_analysis['summary']
+state = market_analysis['state']
+
+#print('summary: ',summary)
+#print('state: ',state)

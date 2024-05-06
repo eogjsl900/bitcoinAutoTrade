@@ -3,22 +3,16 @@ import pyupbit
 import datetime
 import schedule
 from prophet import Prophet
+import openaiAPI
 
 
 access = "your-access"
 secret = "your-secret"
 
-def get_target_price(ticker, k):
-    """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
-    target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * k
-    return target_price
+ticker="KRW-BTC"
 
-def get_start_time(ticker):
-    """시작 시간 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
-    start_time = df.index[0]
-    return start_time
+df = pyupbit.get_ohlcv(ticker, interval="minute30")
+
 
 def get_balance(ticker):
     """잔고 조회"""
@@ -31,32 +25,72 @@ def get_balance(ticker):
                 return 0
     return 0
 
+
+
 def get_current_price(ticker):
     """현재가 조회"""
     return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
 
-predicted_close_price = 0
+def rsi_calculation(df, period=14):
+
+    # 전일 대비 변동 평균
+    df['change'] = df['close'].diff()
+
+    # 상승한 가격과 하락한 가격
+    df['up'] = df['change'].apply(lambda x: x if x > 0 else 0)
+    df['down'] = df['change'].apply(lambda x: -x if x < 0 else 0)
+
+    # 상승 평균과 하락 평균
+    df['avg_up'] = df['up'].ewm(alpha=1/period).mean()
+    df['avg_down'] = df['down'].ewm(alpha=1/period).mean()
+
+    # 상대강도지수(RSI) 계산
+    df['rs'] = df['avg_up'] / df['avg_down']
+    df['rsi'] = 100 - (100 / (1 + df['rs']))
+    rsi = df['rsi']
+
+    return df['rsi'].values[-1]
+
 def predict_price(ticker):
-    """Prophet으로 당일 종가 가격 예측"""
-    global predicted_close_price
-    df = pyupbit.get_ohlcv(ticker, interval="minute60")
+    """Prophet으로 periods=4 시간 뒤 방향성 예측"""
+    df = pyupbit.get_ohlcv(ticker, interval="minute30")
     df = df.reset_index()
     df['ds'] = df['index']
     df['y'] = df['close']
     data = df[['ds','y']]
     model = Prophet()
     model.fit(data)
-    future = model.make_future_dataframe(periods=24, freq='H')
+    future = model.make_future_dataframe(periods=4, freq='h')
     forecast = model.predict(future)
-    fig1 = model.plot(forecast)
-    closeDf = forecast[forecast['ds'] == forecast.iloc[-1]['ds'].replace(hour=9)]
-    if len(closeDf) == 0:
-        closeDf = forecast[forecast['ds'] == data.iloc[-1]['ds'].replace(hour=9)]
-    closeValue = closeDf['yhat'].values[0]
-    predicted_close_price = closeValue
-predict_price("KRW-BTC")
-print("가격예측:",predicted_close_price)
-schedule.every().hour.do(lambda: predict_price("KRW-BTC"))
+    return forecast['yhat']
+
+
+forecast = predict_price(ticker)
+AI_State=openaiAPI.state
+rsi = rsi_calculation(df)
+
+def predict_and_trade(ticker):
+
+    global forecast
+    global AI_State
+    global rsi
+
+    forecast = predict_price(ticker)
+    AI_State = openaiAPI.state
+    df = pyupbit.get_ohlcv(ticker, interval="minute30")
+    rsi = rsi_calculation(df)
+    print('close_price: ',forecast.values[-5])
+    print('predicted_close_price: ',forecast.values[-1])
+    print('AI_State: ',AI_State)
+    print('rsi: ',rsi)
+
+schedule.every(30).minutes.do(lambda: predict_and_trade(ticker))
+
+
+print('close_price: ',forecast.values[-5])
+print('predicted_close_price: ',forecast.values[-1])
+print('AI_State: ',AI_State)
+print('rsi: ',rsi)
 
 # 로그인
 upbit = pyupbit.Upbit(access, secret)
@@ -65,22 +99,45 @@ print("autotrade start")
 # 자동매매 시작
 while True:
     try:
-        now = datetime.datetime.now()
-        start_time = get_start_time("KRW-BTC")
-        end_time = start_time + datetime.timedelta(days=1)
         schedule.run_pending()
 
-        if start_time < now < end_time - datetime.timedelta(seconds=10):
-            target_price = get_target_price("KRW-BTC", 0.5)
-            current_price = get_current_price("KRW-BTC")
-            if target_price < current_price and current_price < predicted_close_price:
-                krw = get_balance("KRW")
-                if krw > 5000:
-                    upbit.buy_market_order("KRW-BTC", krw*0.9995)
-        else:
-            btc = get_balance("BTC")
-            if btc > 0.00008:
-                upbit.sell_market_order("KRW-BTC", btc*0.9995)
+        current_price = get_current_price(ticker)
+        btc_avg=upbit.get_avg_buy_price("BTC")
+
+        target_income = btc_avg+500000.0
+        target_loss = btc_avg-500000.0
+
+
+        # 현재가격보다 상승으로 예측 하면서 뉴스 분석이 긍정일때 매수
+        # periods=4 , forecast.values[-1] 2시간뒤 예측값
+        if (forecast.values[-5]+500000.0 < forecast.values[-1]) and (AI_State == 'hold' or AI_State == 'buy') :
+            krw = get_balance("KRW")
+            if krw > 5000:
+                upbit.buy_market_order(ticker, krw*0.9995)
+                print('매수가격:',current_price)
+
+        # RSI 가 20보다 작으면 매수
+        elif rsi<20 : 
+            krw = get_balance("KRW")
+            if krw > 5000:
+                upbit.buy_market_order(ticker, krw*0.9995)
+                print('매수가격:',current_price)
+
+        # 매수가 + 500000 가 됐으면 이익실현
+        elif target_income < current_price:
+            btc = upbit.get_balance("BTC")
+            if btc > 0.00015:
+                upbit.sell_market_order(ticker, btc)
+                print('익절가격:',current_price)
+
+        # 매수가 - 500000 가 됐으면 손절
+        elif target_loss > current_price:
+            btc = upbit.get_balance("BTC")
+            if btc > 0.00015:
+                upbit.sell_market_order(ticker, btc)
+                print('손절가격:',current_price)
+
+
         time.sleep(1)
     except Exception as e:
         print(e)
