@@ -71,3 +71,22 @@ pip install holidays==0.10.3
 + status는 긍정 = "positive" , 부정 = "nagetive" , 중립 = "neutral"
 + score는 긍정일때 양수 부정일때 음수값이 들어가며 전체 점수의 합을 totalScore에 기록한다.
 
+
+
+# ** 매매 기록 그래프로 시각화 **
+
+![graph](https://github.com/eogjsl900/bitcoinAutoTrade/assets/34729371/a2a2e8ec-f675-4873-be05-e9f0c1f7dd59)
+
+
+
+
+
+
+
+
+최근 10건의 매수 매도 기록을 그래프로 시각화 하였다.
+
+매매기록을 분석하여 전략을 수정 개선을 진행
+
+
+
